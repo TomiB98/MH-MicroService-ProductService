@@ -34,6 +34,28 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    public Integer getProductStockById(Long id) throws NoProductsFoundException {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new NoProductsFoundException("Product with ID " + id + " not found."));
+        return product.getStock();
+    }
+
+
+    @Override
+    public void reduceStock(Long productId, Integer quantity) throws NoProductsFoundException, StockException {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoProductsFoundException("Product with ID " + productId + " not found."));
+
+        if (product.getStock() < quantity) {
+            throw new StockException("Not enough stock for product with ID " + productId);
+        }
+
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
+    }
+
+
+    @Override
     public List<ProductDTO> getAllProducts() throws NoProductsFoundException {
 
         List<ProductDTO> products = productRepository.findAll().stream()

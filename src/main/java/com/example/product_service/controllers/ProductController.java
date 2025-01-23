@@ -6,6 +6,7 @@ import com.example.product_service.dtos.UpdateProduct;
 import com.example.product_service.exceptions.AllBlanksException;
 import com.example.product_service.exceptions.NoProductsFoundException;
 import com.example.product_service.exceptions.ProductPriceException;
+import com.example.product_service.exceptions.StockException;
 import com.example.product_service.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,38 @@ public class ProductController {
         }
     }
 
+
+    @GetMapping("/stock/{id}")
+    public ResponseEntity<?> getProductStock(@PathVariable Long id) {
+        try {
+            Integer stock = productService.getProductStockById(id);
+            return ResponseEntity.ok(stock);
+        } catch (NoProductsFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>("An error occurred while fetching the product stock.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PutMapping("/{id}/reduce-stock")
+    public ResponseEntity<?> reduceStock(@PathVariable Long id, @RequestParam Integer quantity) {
+        try {
+            productService.reduceStock(id, quantity);
+            return ResponseEntity.ok("Stock updated successfully.");
+
+        } catch (NoProductsFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+        } catch (StockException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error updating stock.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     @GetMapping("/products")
     public ResponseEntity<?> getAllProducts() throws NoProductsFoundException {
 
@@ -54,6 +87,7 @@ public class ProductController {
 
         }
     }
+
 
     @PostMapping("/products")
     public ResponseEntity<?> createNewProduct(@RequestBody NewProduct newProduct) throws Exception {
