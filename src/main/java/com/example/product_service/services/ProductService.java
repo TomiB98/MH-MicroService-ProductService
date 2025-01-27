@@ -17,6 +17,9 @@ public interface ProductService {
     ProductDTO getProductDTOById(Long id) throws NoProductsFoundException;
     List<ProductDTO> getAllProducts() throws NoProductsFoundException;
 
+    String getNameById(Long id) throws NoProductsFoundException;
+    Double getPriceById(Long id) throws NoProductsFoundException;
+
     Integer getProductStockById(Long id) throws NoProductsFoundException;
     void reduceStock(Long productId, Integer quantity) throws NoProductsFoundException, StockException;
 

@@ -34,6 +34,20 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    public String getNameById(Long id) throws NoProductsFoundException {
+        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new NoProductsFoundException("Product with ID " + id + " not found."));
+        return product.getName();
+    }
+
+
+    @Override
+    public Double getPriceById(Long id) throws NoProductsFoundException {
+        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new NoProductsFoundException("Product with ID " + id + " not found."));
+        return product.getProductprice();
+    }
+
+
+    @Override
     public Integer getProductStockById(Long id) throws NoProductsFoundException {
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new NoProductsFoundException("Product with ID " + id + " not found."));
