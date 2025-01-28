@@ -70,6 +70,16 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    public void restockProduct(Long productId, Integer quantity) throws NoProductsFoundException {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoProductsFoundException("Product with ID " + productId + " not found."));
+
+        product.setStock(product.getStock() + quantity);
+        productRepository.save(product);
+    }
+
+
+    @Override
     public List<ProductDTO> getAllProducts() throws NoProductsFoundException {
 
         List<ProductDTO> products = productRepository.findAll().stream()

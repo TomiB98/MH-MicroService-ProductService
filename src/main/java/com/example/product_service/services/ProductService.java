@@ -15,6 +15,7 @@ public interface ProductService {
 
     ProductEntity getProductById(Long id) throws NoProductsFoundException;
     ProductDTO getProductDTOById(Long id) throws NoProductsFoundException;
+
     List<ProductDTO> getAllProducts() throws NoProductsFoundException;
 
     String getNameById(Long id) throws NoProductsFoundException;
@@ -22,6 +23,7 @@ public interface ProductService {
 
     Integer getProductStockById(Long id) throws NoProductsFoundException;
     void reduceStock(Long productId, Integer quantity) throws NoProductsFoundException, StockException;
+    void restockProduct(Long productId, Integer quantity) throws NoProductsFoundException;
 
     void createNewProduct (NewProduct newProduct) throws Exception;
     ProductEntity saveProduct(ProductEntity newProduct);
