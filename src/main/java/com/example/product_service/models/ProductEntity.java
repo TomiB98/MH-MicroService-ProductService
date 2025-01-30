@@ -15,6 +15,7 @@ public class ProductEntity {
     private String name, productdescription;
     private Double productprice;
     private Integer stock;
+    private boolean available = true;
 
     public ProductEntity() { }
 
@@ -23,6 +24,7 @@ public class ProductEntity {
         this.productdescription = productdescription;
         this.productprice = productprice;
         this.stock = stock;
+        this.available = available;
     }
 
     public Long getId() {
@@ -59,5 +61,13 @@ public class ProductEntity {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 }

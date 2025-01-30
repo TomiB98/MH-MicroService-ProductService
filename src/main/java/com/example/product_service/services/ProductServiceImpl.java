@@ -1,8 +1,6 @@
 package com.example.product_service.services;
 
-import com.example.product_service.dtos.NewProduct;
-import com.example.product_service.dtos.ProductDTO;
-import com.example.product_service.dtos.UpdateProduct;
+import com.example.product_service.dtos.*;
 import com.example.product_service.exceptions.AllBlanksException;
 import com.example.product_service.exceptions.NoProductsFoundException;
 import com.example.product_service.exceptions.ProductPriceException;
@@ -108,7 +106,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductDTO updateProductById(UpdateProduct updatedProduct, Long id) throws Exception {
+    public ProductAdminDTO updateProductById(UpdateProduct updatedProduct, Long id) throws Exception {
 
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(()-> new NoProductsFoundException("Product with ID " + id + " not found."));
@@ -131,8 +129,18 @@ public class ProductServiceImpl implements ProductService {
             product.setStock(updatedProduct.stock() );
         }
 
+        if (!updatedProduct.availability().isBlank()) {
+            if(updatedProduct.availability().equals("false")) {
+                product.setAvailable(false);
+            }
+            if(updatedProduct.availability().equals("true")) {
+                product.setAvailable(true);
+            }
+        }
+
+
         productRepository.save(product);
-        return new ProductDTO(product);
+        return new ProductAdminDTO(product);
     }
 
 
@@ -141,6 +149,13 @@ public class ProductServiceImpl implements ProductService {
         validateProductPrice(updatedProduct.productprice());
         validateAllBlanks(updatedProduct.name(), updatedProduct.productdescription(), updatedProduct.productprice(), updatedProduct.stock());
         validateStock(updatedProduct.stock());
+        validateAvailabilty(updatedProduct.availability());
+    }
+
+    public static void validateAvailabilty(String availability) throws AllBlanksException {
+        if(!availability.equals("true") && !availability.equals("false")) {
+            throw new AllBlanksException("At least one value has to be modified.");
+        }
     }
 
     public static void validateAllBlanks(String name, String productdescription, Double productprice, Integer stock) throws AllBlanksException {

@@ -1,16 +1,16 @@
 package com.example.product_service.controllers;
 
-import com.example.product_service.dtos.NewProduct;
-import com.example.product_service.dtos.ProductDTO;
-import com.example.product_service.dtos.UpdateProduct;
+import com.example.product_service.dtos.*;
 import com.example.product_service.exceptions.AllBlanksException;
 import com.example.product_service.exceptions.NoProductsFoundException;
 import com.example.product_service.exceptions.ProductPriceException;
 import com.example.product_service.exceptions.StockException;
 import com.example.product_service.services.ProductService;
+import com.example.product_service.services.TokenDataServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +22,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private TokenDataServiceImpl tokenDataService;
 
     @GetMapping("/")
     public ResponseEntity<String> invalidPath() {
@@ -137,7 +140,7 @@ public class ProductController {
     @Operation(summary = "Gets all the products", description = "Returns all the products.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Data successfully received."),
-            @ApiResponse(responseCode = "400", description = "Bad request, pool task empty.")
+            @ApiResponse(responseCode = "400", description = "Bad request, pool product empty.")
     })
     public ResponseEntity<?> getAllProducts() throws NoProductsFoundException {
 
@@ -157,13 +160,20 @@ public class ProductController {
     @PostMapping("/products")
     @Operation(summary = "Creates a new product", description = "Receives a name, description, price, stock and creates a new product.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Task successfully created."),
-            @ApiResponse(responseCode = "403", description = "Unauthorized to create a task for another user."),
+            @ApiResponse(responseCode = "201", description = "Product successfully created."),
+            @ApiResponse(responseCode = "403", description = "Unauthorized to create a product."),
             @ApiResponse(responseCode = "409", description = "Bad request, invalid data.")
     })
-    public ResponseEntity<?> createNewProduct(@RequestBody NewProduct newProduct) throws Exception {
+    public ResponseEntity<?> createNewProduct(@RequestBody NewProduct newProduct, HttpServletRequest request) throws Exception {
 
         try {
+
+            String authenticatedUserRole = tokenDataService.getRole(request);
+
+            if (!authenticatedUserRole.equals("ADMIN")) {
+                return new ResponseEntity<>("Forbidden: You cannot access this data.", HttpStatus.FORBIDDEN);
+            }
+
             productService.createNewProduct(newProduct);
             return new ResponseEntity<>("Product crated succesfully", HttpStatus.CREATED);
 
@@ -180,14 +190,21 @@ public class ProductController {
     @PutMapping("products/{id}")
     @Operation(summary = "Updates a product with the id", description = "Receives an id and updates all or independent product data.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Task successfully created."),
-            @ApiResponse(responseCode = "403", description = "Unauthorized to create a task for another user."),
+            @ApiResponse(responseCode = "201", description = "Product successfully created."),
+            @ApiResponse(responseCode = "403", description = "Unauthorized to update product."),
             @ApiResponse(responseCode = "409", description = "Bad request, invalid data.")
     })
-    public ResponseEntity<?> updateProductById(@RequestBody UpdateProduct updateProduct, @PathVariable Long id) throws Exception {
+    public ResponseEntity<?> updateProductById(@RequestBody UpdateProduct updateProduct, @PathVariable Long id, HttpServletRequest request) throws Exception {
 
         try {
-            ProductDTO updatedProduct = productService.updateProductById(updateProduct, id);
+
+            String authenticatedUserRole = tokenDataService.getRole(request);
+
+            if (!authenticatedUserRole.equals("ADMIN")) {
+                return new ResponseEntity<>("Forbidden: You cannot access this data.", HttpStatus.FORBIDDEN);
+            }
+
+            ProductAdminDTO updatedProduct = productService.updateProductById(updateProduct, id);
             return ResponseEntity.status(HttpStatus.CREATED).body(updatedProduct);
 
         } catch (NoProductsFoundException e) {
@@ -201,4 +218,5 @@ public class ProductController {
 
         }
     }
+
 }
