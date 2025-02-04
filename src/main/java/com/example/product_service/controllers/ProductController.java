@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/product")
 public class ProductController {
@@ -53,38 +55,11 @@ public class ProductController {
     }
 
 
-    @GetMapping("/name/{id}")
-    @Operation(summary = "Gets a product name with the id", description = "Receives an id and returns the specified name of the product.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Data successfully received."),
-            @ApiResponse(responseCode = "400", description = "Bad request, invalid id.")
-    })
-    public ResponseEntity<String> getProductName(@PathVariable Long id) {
+    @PostMapping("/details")
+    public ResponseEntity<Object> getProductsDetails(@RequestBody List<Long> productIds) throws NoProductsFoundException {
         try {
-            String productName = productService.getNameById(id);
-            return ResponseEntity.ok(productName);
-
-        } catch (NoProductsFoundException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-
-        } catch (Exception e) {
-        return new ResponseEntity<>("An error occurred while searching the product data, try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
-
-        }
-    }
-
-
-    @GetMapping("/price/{id}")
-    @Operation(summary = "Gets a product price with the id", description = "Receives an id and returns the specified price of the product.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Data successfully received."),
-            @ApiResponse(responseCode = "400", description = "Bad request, invalid id.")
-    })
-    public ResponseEntity<Object> getProductPrice(@PathVariable Long id) {
-        try {
-            Double productPrice = productService.getPriceById(id);
-            return ResponseEntity.ok(productPrice);
-
+            List<ProductDTO> products = productService.getProductsByIds(productIds);
+            return ResponseEntity.ok(products);
         } catch (NoProductsFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 
@@ -92,6 +67,7 @@ public class ProductController {
             return new ResponseEntity<>("An error occurred while searching the product data, try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
+
     }
 
 
@@ -220,3 +196,44 @@ public class ProductController {
     }
 
 }
+
+//    @GetMapping("/name/{id}")
+//    @Operation(summary = "Gets a product name with the id", description = "Receives an id and returns the specified name of the product.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Data successfully received."),
+//            @ApiResponse(responseCode = "400", description = "Bad request, invalid id.")
+//    })
+//    public ResponseEntity<String> getProductName(@PathVariable Long id) {
+//        try {
+//            String productNameAndPrice = productService.getNameById(id);
+//            return ResponseEntity.ok(productNameAndPrice);
+//
+//        } catch (NoProductsFoundException e) {
+//        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+//
+//        } catch (Exception e) {
+//        return new ResponseEntity<>("An error occurred while searching the product data, try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+//
+//        }
+//    }
+//
+//
+//    @GetMapping("/price/{id}")
+//    @Operation(summary = "Gets a product price with the id", description = "Receives an id and returns the specified price of the product.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Data successfully received."),
+//            @ApiResponse(responseCode = "400", description = "Bad request, invalid id.")
+//    })
+//    public ResponseEntity<Object> getProductPrice(@PathVariable Long id) {
+//        try {
+//            Double productPrice = productService.getPriceById(id);
+//            return ResponseEntity.ok(productPrice);
+//
+//        } catch (NoProductsFoundException e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+//
+//        } catch (Exception e) {
+//            return new ResponseEntity<>("An error occurred while searching the product data, try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+//
+//        }
+//    }

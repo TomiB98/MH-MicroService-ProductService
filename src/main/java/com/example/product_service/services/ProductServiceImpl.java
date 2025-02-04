@@ -31,18 +31,37 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    @Override
-    public String getNameById(Long id) throws NoProductsFoundException {
-        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new NoProductsFoundException("Product with ID " + id + " not found."));
-        return product.getName();
+    public List<ProductDTO> getProductsByIds(List<Long> productIds) throws NoProductsFoundException {
+        List<ProductEntity> products = productRepository.findByIdIn(productIds);
+
+        if (products.size() != productIds.size()) {
+            // Encontrar los IDs que no están en la base de datos
+            List<Long> missingIds = productIds.stream()
+                    .filter(id -> products.stream().noneMatch(product -> product.getId().equals(id)))
+                    .collect(Collectors.toList());
+
+            // Lanzar una excepción con los IDs faltantes
+            throw new NoProductsFoundException("The following products id's were not found: " + missingIds);
+        }
+
+        return products.stream()
+                .map(product -> new ProductDTO(product))
+                .toList();
     }
 
 
-    @Override
-    public Double getPriceById(Long id) throws NoProductsFoundException {
-        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new NoProductsFoundException("Product with ID " + id + " not found."));
-        return product.getProductprice();
-    }
+//    @Override
+//    public String getNameById(Long id) throws NoProductsFoundException {
+//        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new NoProductsFoundException("Product with ID " + id + " not found."));
+//        return product.getName();
+//    }
+//
+//
+//    @Override
+//    public Double getPriceById(Long id) throws NoProductsFoundException {
+//        ProductEntity product = productRepository.findById(id).orElseThrow( () -> new NoProductsFoundException("Product with ID " + id + " not found."));
+//        return product.getProductprice();
+//    }
 
 
     @Override
